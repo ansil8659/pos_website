@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title of the document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <style>
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 8;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .modal-content {
+        margin: 50px auto;
+        border: 1px solid #999;
+        width: 20%;
+      }
+      h2,
+      p {
+        margin: 0 0 20px;
+        font-weight: 400;
+        color: #999;
+      } 
+      span {
+        color: #666;
+        display: block;
+        padding: 0 0 5px;
+      }
+      form {
+        padding: 25px;
+        margin: 25px;
+        box-shadow: 0 2px 5px #f5f5f5;
+        background: #eee;
+      }
+      input {
+        width: 90%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #1c87c9;
+        outline: none;
+      }
+      .contact-form button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        background: #1c87c9;
+        font-size: 16px;
+        font-weight: 400;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <center>
+    <h2>POS</h2>
+    <button class="button" data-modal="modalOne">Add Product</button>
+    <button class="button" data-modal="modalTwo">Add Customer</button>
+    </center>
+
+    <div class="row" style="width: 50%;">
+      <div class="col-md-8">
+        <table class="table table-bordered">
+          <thead class="alert-info">
+            <tr>
+              <th>Product</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody id="result"></tbody>
+        </table>
+      </div>
+      <div class="col-md-4">
+        <table class="table table-bordered">
+          <thead class="alert-info">
+            <tr>
+              <th>Customer</th>
+            </tr>
+          </thead>
+          <tbody id="result_customer"></tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div id="modalOne" class="modal">
+        <div class="modal-content">
+          <div class="contact-form">
+            <a class="close">&times;</a>
+            <form name="submit-product">
+              <h2>Product</h2>
+              <div>
+                <input type="text" name="product" placeholder="Product" id="product"/>
+                <input type="number" name="price" placeholder="Price" id="price"/>
+              </div>
+              <button type="button" id="product_submit" onclick="addData()">Add</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    <div id="modalTwo" class="modal">
+      <div class="modal-content">
+        <div class="contact-form">
+          <a class="close">&times;</a>
+          <form name="submit-customer">
+            <h2>Customer</h2>
+            <div>
+              <input type="text" name="customer" placeholder="Customer" id="customer"/>
+            </div>
+            <button type="button" id="product_submit" onclick="addCust()">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <form>
+        <select name="customer" id="MyDataCust">
+          <option selected="">Customer</option>
+        </select>
+        <select name="product" id="MyDataProd">
+          <option selected="">Product</option>
+        </select>
+        <button type="button" id="addorder" onclick="_addorder()">Add</button>
+        <div>
+          <table class="table table-bordered">
+            <thead class="alert-info">
+              <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Sub-total</th>
+              </tr>
+            </thead>
+            <tbody id="order"></tbody>
+          </table>
+          <div style="padding-left: 80%;" id="total"></div>
+        </div>
+      </form>
+    </div>
+    
+  
+    
+    
+    <script>
+      let modalBtns = [...document.querySelectorAll(".button")];
+      modalBtns.forEach(function (btn) {
+        btn.onclick = function () {
+          let modal = btn.getAttribute("data-modal");
+          document.getElementById(modal).style.display = "block";
+        };
+      });
+      let closeBtns = [...document.querySelectorAll(".close")];
+      closeBtns.forEach(function (btn) {
+        btn.onclick = function () {
+          let modal = btn.closest(".modal");
+          modal.style.display = "none";
+        };
+      });
+      window.onclick = function (event) {
+        if (event.target.className === "modal") {
+          event.target.style.display = "none";
+        }
+      };
+    </script>
+    <script>
+      var sub_total;
+      var prdct_ptice;
+      var sum_total = 0;
+      function addData(){
+        var product=document.getElementById('product').value;
+        var price=document.getElementById('price').value;
+        var nameSelect =document.getElementById("MyDataProd");
+        var form = document.forms['submit-product']
+        console.log(form)
+        
+        
+        if(product =="" || price ==""){
+          alert("Please enter something first!");
+        }else{
+          var html="";
+          
+          html="<tr><td>"+product+"</td><td>"+price+"</td></tr>";
+          
+          document.getElementById('result').innerHTML+=html;
+      
+          document.getElementById('product').value="";
+          document.getElementById('price').value="";
+        }
+        form.reset()
+        var optionName = document.createElement("option");
+        optionName.text = product;
+        nameSelect.add(optionName)
+ 
+      }
+
+      function addCust(){
+        var customer=document.getElementById('customer').value;
+        var table = document.getElementById('result_customer');
+      var nameSelect =document.getElementById("MyDataCust"); 
+        var form = document.forms['submit-customer']
+        console.log(form)
+        
+        
+        if(customer ==""){
+          alert("Please enter something first!");
+        }else{
+          var html="";
+          
+          html="<tr><td>"+customer+"</td></tr>";
+          
+          document.getElementById('result_customer').innerHTML+=html;
+      
+          document.getElementById('customer').value="";
+        
+        form.reset()
+
+        var optionName = document.createElement("option");
+        optionName.text = customer;
+        nameSelect.add(optionName)
+        }
+      }
+
+      function _addorder(){
+        console.log("qwerty")
+        var prdct = document.getElementById('MyDataProd').selectedIndex;
+        var cust = document.getElementById('MyDataCust').value;
+        var prdct_slct = document.getElementById('result');
+        var prdct_total = document.getElementById('order');
+        for (var i = 0, row; row = prdct_slct.rows[i]; i++) {
+             console.log(i,row.cells[1], "lklklk")
+             if(prdct - 1  == i){
+              prdct_ptice = row.cells[1].innerText
+              console.log(row.cells[0].innerText,row.cells[1], "oooooooooooo")
+              sub_total = prdct_ptice * 1
+              var html="";
+          
+          html="<tr><td>"+row.cells[0].innerText+"</td><td>"+row.cells[1].innerText+"</td><td><input type='number' value='1' class='quant'/></td><td class='sub_total'>"+sub_total+"</td><td><button onClick='onClickRemove(this)'>Remove</button></td></tr>";
+          
+          document.getElementById('order').innerHTML+=html;
+             }
+             document.querySelectorAll('.quant')
+          .forEach(e => e.addEventListener("change", function() {
+              // Here, `this` refers to the element the event was hooked on
+              console.log(e.value)
+              let quant = e.value;
+              let price = e.parentNode.parentNode.firstChild.nextSibling.innerHTML;
+              e.parentNode.nextSibling.innerHTML = parseInt(quant) * parseInt(price);
+          //     for(var i = 1; i < prdct_total.rows.length; i++)
+          //             {
+          //               console.log("aaaaaaaaaaa")
+          //               sum_total = sum_total + parseInt(prdct_total.rows[i].cells[3].innerHTML);
+          //               console.log(sum_total, "local")
+          //             }
+          //             console.log(sum_total, "prasanna")
+          // document.getElementById('total').innerHTML = sum_total;
+                      
+          }));
+        }
+        
+        // for(var i = 1; i < prdct_total.rows.length; i++)
+        //     {
+        //       console.log("aaaaaaaaaaa")
+        //       sum_total = sum_total + parseInt(prdct_total.rows[i].cells[3].innerHTML);
+        //       console.log(sum_total, "local")
+        //     }
+            
+
+        var x = document.getElementById("result").rows[1].cells;
+        console.log(x, "poppoo")
+        console.log(x[0].value)
+        // if (){}
+        console.log(prdct, cust)
+        console.log(prdct_slct)
+      }
+
+      updateSubTotal(); // Initial call
+
+      function updateSubTotal() {
+          var table = document.getElementById("order");
+          sum_total = Array.from(table.rows).slice(1).reduce((total, row) => {
+            return total + parseFloat(row.cells[3].innerHTML);
+          }, 0);
+          document.getElementById("val").innerHTML = "SubTotal = $" + sum_total.toFixed(2);
+      }
+      console.log("qwerty", sum_total)
+
+      // function updateSubTotal() {
+      //       var table = document.getElementById("order");
+      //       sum_total = Array.from(table.rows).slice(1).reduce((total, row) => {
+      //         return total + parseFloat(row.cells[3].innerHTML);
+      //       }, 0);
+      //       // let subTotal2 = Array.from(table.rows).slice(1).reduce((total, row) => {
+      //       //   return total + parseFloat(row.cells[2].innerHTML);
+      //       // }, 0);
+      //       document.getElementById("total").innerHTML = "SubTotal = $" + sum_total.toFixed(2);
+      //       // document.getElementById("val1").innerHTML = subTotal2.toFixed(2);
+      //   }
+
+      function onClickRemove(deleteButton) {
+        let row = deleteButton.parentElement.parentElement;
+        row.parentNode.removeChild(row);
+        updateSubTotal(); // Call after delete
+      }
+
+      
+
+    </script>
+
+  </body>
+</html>
+
